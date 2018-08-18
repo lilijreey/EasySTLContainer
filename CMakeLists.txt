@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(easySTL)
 
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
+set(CMAKE_CXX_COMPILER "g++-8")
+
+set(CMAKE_CXX_FLAGS "-Wall -std=c++17")
 
 #add_library(easystl INTERFACE)
 #target_sources(easystl INTERFACE src/estl.hpp)

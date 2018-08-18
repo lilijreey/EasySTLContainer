@@ -1,4 +1,6 @@
 # EasySTLContainer
+An set of STL container wrap class, provied a lot of functional style algorithm member functions.
+ 
 
 
 # install
