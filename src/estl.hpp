@@ -60,16 +60,17 @@ template <
     }
 
 
+    //XXX use &&
     template <class Unarypredicate>
-    typename stl_container_type::const_iterator find(Unarypredicate &fn) const
+    typename stl_container_type::const_iterator find(const Unarypredicate &fn) const
     {
-        return std::find_if(this->begin(), this->end(), std::forward<Unarypredicate>(fn));
+        return std::find_if(this->begin(), this->end(), fn);
     }
 
     template <class Unarypredicate>
-    typename stl_container_type::iterator find(Unarypredicate &&fn)
+    typename stl_container_type::iterator find(const Unarypredicate &fn)
     {
-        return std::find_if(this->begin(), this->end(), std::forward<Unarypredicate>(fn));
+        return std::find_if(this->begin(), this->end(), fn);
     }
 
 
@@ -78,10 +79,40 @@ template <
         return find(e) != this->end();
     }
 
+    //TODO support {1,2,3,4} litter
+    template <class Container>
+    bool is_equal(const Container &o) const
+    {
+        return this->size() == std::size(o) &&
+               std::equal(this->begin(), this->end(), std::begin(o), std::end(o));
+    }
+
+
+    ///@brief Invokes the given fn once for each element of self.
+    template <class Fn>
+    Vector& map_self(Fn &&fn)
+    {
+        const size_t size = this->size();
+        for (size_t i=0; i < size; ++i)
+            std::forward<Fn>(fn)(this->operator[](i));
+
+        return *this;
+    }
+
+
+    ///@brief
+//    template <class Fn>
+//    Vector& select(MapFn &&fn)
+//    {
+//        const size_t size = this->size();
+//        for (size_t i=0; i < size; ++i)
+//            fn(this->operator[](i));
+//
+//        return *this;
+//    }
 
 
     //collect
-    //map_self
     //reduce
     //select
     //select_until

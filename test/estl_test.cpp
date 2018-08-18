@@ -1,4 +1,5 @@
 
+#include <utility>
 #include <list>
 #include <gtest/gtest.h>
 #include "../src/estl.hpp"
@@ -52,12 +53,18 @@ TEST(vector, read_only_methods)
     ASSERT_TRUE(v.is_include(3));
     ASSERT_FALSE(v.is_include(13));
 
-//    ASSERT_EQ(v.begin(), v.find(lamdba_exp(_ele > 0)));
-//    auto  it = v.find(1);
-//    for (auto e : v.find_iter(1))
-//    {
-//
-//    }
+    ASSERT_EQ(v.begin(), v.find(lamdba_exp(_ele > 0)));
+
+    v.map_self([](auto &_ele){_ele += 1;});
+    auto xx = {3,2,4,2,5,2};
+    ASSERT_TRUE(v.is_equal(xx));
+    if (std::is_same<std::initializer_list<int>, decltype(xx)>::value)
+    {
+        printf("is same\n");
+    }
+
+    //删除所有<=3 的元素
+    xx.remove()
 
 
 }
