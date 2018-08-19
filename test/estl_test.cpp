@@ -58,13 +58,33 @@ TEST(vector, read_only_methods)
     v.map_self([](auto &_ele){_ele += 1;});
     auto xx = {3,2,4,2,5,2};
     ASSERT_TRUE(v.is_equal(xx));
-    if (std::is_same<std::initializer_list<int>, decltype(xx)>::value)
-    {
-        printf("is same\n");
-    }
+    v = xx;
+
+
+
+    v.select_while(lamdba_exp(_ele > 3),
+                   lamdba_fn{ASSERT_TRUE(_ele >3);});
+
+
+    v.erase(lamdba_exp(_ele>3));
+   v = xx;
+   auto it = v.select_iter(
+       lamdba_exp(_ele %2 == 0));
+
+   ASSERT_EQ(*it++, 2);
+   ASSERT_EQ(*it++,4);
+   ASSERT_EQ(*it++,2);
+
+   for (auto & e : v.select_iter(lamdba_exp(_ele %2 ==0)))
+{
+      // printf("%d,", e);
+       ASSERT_TRUE(e < 3);
+}
+
+   // v.foldl(3, [](int acc, ele))
 
     //删除所有<=3 的元素
-    xx.remove()
+    //xx.remove()
 
 
 }
