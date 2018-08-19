@@ -155,16 +155,10 @@ public:
       return SelectIter(fn, this);
   }
 
-  //TODO
-//  SelectIter select_iter(SelectFn &&fn) const
-//  {
-//      return SelectIter(fn, this);
-//  }
 
   ///@brief select element and pass to fn, as same as 'take_while' in other luangages
   ///@param selectFn return true if select element
   ///@param fn
-  //TODO 改造成返回一个可迭代对象
   template<class SelectFn, class Fn>
   Vector &select_while(SelectFn &&selectFn, Fn &&fn) {
       for (auto &e: *this)
@@ -175,6 +169,14 @@ public:
   }
 
 
+  template <class R, class BinaryFn>
+  R fold(R &&init, BinaryFn &&fn) const {
+      R acc = std::forward<R>(init);
+      for (const auto &e: *this) {
+          acc = std::forward<BinaryFn>(fn)(acc, e);
+      }
+      return acc;
+  }
 
 
 

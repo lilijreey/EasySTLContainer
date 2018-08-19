@@ -78,9 +78,10 @@ TEST(vector, read_only_methods)
    for (auto & e : v.select_iter(lamdba_exp(_ele %2 ==0)))
 {
       // printf("%d,", e);
-       ASSERT_TRUE(e < 3);
+       ASSERT_TRUE(e %2 == 0);
 }
 
+ASSERT_EQ(18, v.fold(0, [](const auto &acc, const auto &e){return acc + e;}));
    // v.foldl(3, [](int acc, ele))
 
     //删除所有<=3 的元素
