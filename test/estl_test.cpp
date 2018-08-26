@@ -43,8 +43,12 @@ TEST(vector, read_only_methods)
 
     ASSERT_TRUE(v.is_none_of(lamdba_fn{ return _ele < 0;}));
 
+    int _t = 3;
+    const int _ct =_t;
     ASSERT_EQ(0, v.count(11));
     ASSERT_EQ(1, v.count(1));
+    ASSERT_EQ(1, v.count(_t));
+    ASSERT_EQ(1, v.count(_ct));
     ASSERT_EQ(v.size(), v.count(lamdba_exp(_ele > 0)));
 
     v = {2,1,3,1,4,1};
@@ -58,6 +62,7 @@ TEST(vector, read_only_methods)
     v.map_self([](auto &_ele){_ele += 1;});
     auto xx = {3,2,4,2,5,2};
     ASSERT_TRUE(v.is_equal(xx));
+    ASSERT_TRUE(v.is_equal({3,2,4,2,5,2}));
     v = xx;
 
 

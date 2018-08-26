@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <type_traits>
 
 namespace estl {
 
@@ -29,15 +30,28 @@ public:
       return std::none_of(this->begin(), this->end(), std::forward<UnaryPredicate>(fn));
   }
 
-  //count
-  auto count(T &&e) -> decltype(std::count(this->begin(), this->end(), T{})) const {
-      return std::count(this->begin(), this->end(), e);
-  }
 
-  template<class Unarypredicate>
-  auto count(Unarypredicate &&fn) -> decltype(std::count(this->begin(), this->end(), T{})) const {
-      return std::count_if(this->begin(), this->end(), std::forward<Unarypredicate>(fn));
-  }
+
+    //T type use std::count
+    template<class E,
+             typename std::enable_if<std::is_same<
+                     typename std::remove_cv<typename std::remove_reference<T>::type>::type,
+                     typename std::remove_cv<typename std::remove_reference<E>::type>::type>::value
+            ,int >::type=0>
+    auto count(E &&e) -> decltype(std::count(this->begin(), this->end(), T{})) const {
+        return std::count(this->begin(), this->end(), std::forward<E>(e));
+    }
+
+    //no T type use std::count_if
+    template<class Fn,
+            typename std::enable_if<!std::is_same<
+                    typename std::remove_cv<typename std::remove_reference<T>::type>::type,
+                    typename std::remove_cv<typename std::remove_reference<Fn>::type>::type>::value
+                    ,int >::type=0>
+    auto count(Fn &&fn) -> decltype(std::count(this->begin(), this->end(), T{})) const {
+        return std::count_if(this->begin(), this->end(), std::forward<Fn>(fn));
+    }
+
 
   ///@brief find the first element in container
   ///@param e find the element
@@ -65,10 +79,13 @@ public:
       return find(e) != this->end();
   }
 
-  //TODO support {1,2,3,4} litter
+  bool is_equal(const std::initializer_list<T> &o) const {
+      return is_equal(o);
+  }
+
   template<class Container>
   bool is_equal(const Container &o) const {
-      return this->size() == std::size(o) &&
+      return this->size() == o.size() &&
           std::equal(this->begin(), this->end(), std::begin(o), std::end(o));
   }
 
@@ -177,6 +194,7 @@ public:
       }
       return acc;
   }
+
 
 
 
