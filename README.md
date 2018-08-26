@@ -27,31 +27,48 @@ Why C++?
 3. 直接操作硬件
 4. 多范式开发
 
-Why Modern C++?
-1. 更强的零开销抽象能力　
-　　a. 可变模板参数
-　  b.
-2. 自动类型推倒
-3. 移动语义
-4. 并发能力
-
-目标?
-人群?
-内容?
-
-Change is Hard
-
-现代C++ 语言设计意图
-实现方式，三个层次
-1. 语言内核
-2. 标准库
-3. 编程风格/方法
-optional， promis/future
-
-特性多，分布广
-OO, 类型， GP（泛型编程),
+---
+Morder C++
 C++11/14/17
 
+Why Modern C++?
+现代C++ 语言设计意图
+1. 更强的零开销抽象能力　
+　a. 可变模板参数
+  b. 自动类型推倒
+2. 更强的泛型能力
+4. 更丰富的STL
+
+特性多，分布广
+note: c++ 之父甚至说把C++11当做一个新语言来看待
+
+---
+
+围绕98的一系列问题，C++11标准新增了大量标准,主要体现在三个层次
+实现方式，三个层次
+1. 语言内核
+   右值引用, 移动语义，可变模板参数，lamdba 表达式,新的关键 conexpiler, ...
+
+2. 标准库
+   新的容器unorder_map/set tuple, 算法, 原子库，线程库,正则库...
+
+结果:
+催生了一大批使用现代c++特性构建新
+ 编程方法和的高质量库和程序
+ 比如
+  基于optional/resual 的统一错误处理方法
+  基于promis/future概念的异步程序开发方法
+
+--- 
+现代C++特性知多少
+...
+...
+
+大家都了解多少?
+
+
+
+---
 
 展示例子
 
@@ -87,13 +104,22 @@ C++11/14/17
     bool isOk =false;
 };
 
-2. log 库 python 方式
+3. log 库 python 方式
     sprintf(buf,%s %f %c", "hello", "3.14", 'c');
 
     std::string s = fmt::format("{} {} {}", "hello", "3.14", 'c');
-     类型安全，任意长度参数
+    类型安全，任意长度参数
 
 
+
+本次讲解知现代C++语言层面的核心概念上，
+帮助大家尽量用最少的时间搞懂这些概念
+也是看懂，用好现代C++的重要基础知识点
+1. 右值引用
+2. 类型推到 auto
+3. 移动语义 std::move
+4. 统一引用和引用折叠 T&&
+5. 完美转发 std::forward
 
 
 
@@ -110,9 +136,6 @@ C++11/14/17
 * understand std::move and std::forward
 * distinguish rvalues reference and universal references
 * understand reference collapsing
-
-本次讲解的核心关在语言层面的改动，也是看懂，用好现代C++的重要基础知识点
-包括
 
 0. 类型推倒 (Type Deduction)
   通过模板来引入 
@@ -258,3 +281,4 @@ rv T&& -> rv
 rl 
 
 
+Change is Hard
