@@ -38,7 +38,8 @@ public:
                      typename std::remove_cv<typename std::remove_reference<T>::type>::type,
                      typename std::remove_cv<typename std::remove_reference<E>::type>::type>::value
             ,int >::type=0>
-    auto count(E &&e) -> decltype(std::count(this->begin(), this->end(), T{})) const {
+   // auto count(E &&e) -> decltype(std::count(this->begin(), this->end(), T{})) const {
+   decltype(auto) count(E &&e) { //14
         return std::count(this->begin(), this->end(), std::forward<E>(e));
     }
 

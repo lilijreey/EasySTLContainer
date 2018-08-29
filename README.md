@@ -18,14 +18,25 @@ just copy xx.hpp file to your project, or system include path
 # test
 depend gtets
 
+// 新，老
+C++已经30年了，
+现代c++的引入给C++这位已经存在30年的语言注入了新的活力
+封面
+老人和小孩 对比
 
+G
 //# Effective Modern C++
 
 Why C++?
+
+0. 多范式开发
 1. 零开销抽象
 2. 泛型
 3. 直接操作硬件
-4. 多范式开发
+
+note:
+C++虽然不完美但是，目前你也很难找到一个在各方面都比C++好的语言
+当然PHP是世界上最好的语言.
 
 ---
 Morder C++
@@ -33,33 +44,36 @@ C++11/14/17
 
 Why Modern C++?
 现代C++ 语言设计意图
-1. 更强的零开销抽象能力　
-　a. 可变模板参数
-  b. 自动类型推倒
-2. 更强的泛型能力
-4. 更丰富的STL
+0. 提高易用性
+1. 提高性能
+1. 更强的泛型能力
+2. 更丰富的STL
 
-特性多，分布广
-note: c++ 之父甚至说把C++11当做一个新语言来看待
+note:
+现代C++对98的改造可以说是 全面的和深入的
+c++ 之父甚至说把C++11当做一个新语言来看待
+背景 C++之父
 
 ---
-
-围绕98的一系列问题，C++11标准新增了大量标准,主要体现在三个层次
-实现方式，三个层次
+围绕98的一系列问题，现代C++(C++11/14/17)标准新增了大量特性,主要体现在三个层次
+上各方面
 1. 语言内核
    右值引用, 移动语义，可变模板参数，lamdba 表达式,新的关键 conexpiler, ...
 
 2. 标准库
    新的容器unorder_map/set tuple, 算法, 原子库，线程库,正则库...
 
-结果:
-催生了一大批使用现代c++特性构建新
+
+
+反过来,
+新的特性有催生了一大批使用现代c++特性构建新
  编程方法和的高质量库和程序
  比如
   基于optional/resual 的统一错误处理方法
   基于promis/future概念的异步程序开发方法
-
 --- 
+
+
 现代C++特性知多少
 ...
 ...
@@ -70,57 +84,94 @@ note: c++ 之父甚至说把C++11当做一个新语言来看待
 
 ---
 
-展示例子
+现代C++ 部分特性展示
+
 
 1.
+```cpp
   std::vector<int, Proson*> persons;
 
   for (std::vector<int, Person*>::iterator it = persons.being(); it != persons.end(); ++it) {
       printf("key %d %s", it->first, it->second->GetName());
   }
 
-  for (auto it = persons.being(); it != persons.end(); ++it) {
+  for (auto it = persons.being(); it != persons.end(); ++it) { //c++11
       printf("key %d %s", it->first, it->second->GetName());
   }
 
-  for (auto &pair : persons) {
+  for (auto &pair : persons) { //c++11 
       printf("key %d %s", pair.first, pair.second.GetName());
   }
 
-  for (auto &[key, person] : persons)
+  for (auto &[key, person] : persons) //c++17
       printf("key %d %s", key, person->GetName());
   }
+  ```
 
-2. class A {
+2. 
+```cpp
+class A {
     A():fd(-1), buf(NULL), isOk(false);
     int fd;
     char *buf;
     bool isOk;
 };
 
-2. class A {
+class A { //C++11
     int fd = -1;
     char *buf = NULL;
     bool isOk =false;
 };
 
-3. log 库 python 方式
-    sprintf(buf,%s %f %c", "hello", "3.14", 'c');
+```
 
-    std::string s = fmt::format("{} {} {}", "hello", "3.14", 'c');
+3. 
+```cpp
+log 库 python 方式
+    sprintf(buf,%s %f %s", "hello", "3.14", msg.c_str());
+
+    format(buf, "{} {} {}", "hello", "3.14", msg);
     类型安全，任意长度参数
+    
+```
+note: 相相有多少个有多少个夜晚你在加班写这种无效代码
 
 
 
-本次讲解知现代C++语言层面的核心概念上，
-帮助大家尽量用最少的时间搞懂这些概念
-也是看懂，用好现代C++的重要基础知识点
+
+
+
+
+
+
+本次课程主要对现代C++11新增的
 1. 右值引用
 2. 类型推到 auto
 3. 移动语义 std::move
 4. 统一引用和引用折叠 T&&
 5. 完美转发 std::forward
+这几个概念做讲解，这些概念都是现代C++语言重要的核心概念，
+市面上大部分教程对这些概念的讲解都不完全，重点散落在各个博客中，解释不透彻。
+完全自学需要花费一定的，如果没听懂也没关系，包教包会，可以咨询。
 
+
+TODO 换个例子
+```cpp
+template<typename T, typename F>
+inline
+auto do_with(T&& rvalue, F&& f) {
+    auto task = std::make_unique<internal::do_with_state<T, std::result_of_t<F(T&)>
+        >(std::forward<T>(rvalue));
+    auto fut = f(task->data());
+    if (fut.available()) {
+        return fut;
+    }
+    auto ret = task->get_future();
+    internal::set_callback(fut, std::move(task));
+    return ret;
+}
+```
+现代C++代码有个特点就是抽象能力很高，并且是零开销抽象。（不消耗运行时间)
 
 
 * distinguish lvalues and rvalues
@@ -255,6 +306,8 @@ Class Dog {
 auto&& //uref
 const auto&& //const rref
 
+// 右值引用 != 右值
+// 右值引用 是左值
 
 const T&& 不是
 const auto&& 不是
@@ -282,3 +335,11 @@ rl
 
 
 Change is Hard
+
+Q&A
+
+编译器: g++4.8 以上 基本支持C++11
+有条件最好g++6.4 以上 完整支持c++14
+
+现代 C++ 的最佳实践
+赠送电子书
