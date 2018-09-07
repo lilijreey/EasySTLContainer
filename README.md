@@ -12,6 +12,10 @@ just copy xx.hpp file to your project, or system include path
 
 #TODO
 借鉴Rust 把迭代函数都放到迭代器中,而不是容器中
+select_iter 泛化 使用与所有容器
+erase_iter
+remove_iter
+
 
 
 

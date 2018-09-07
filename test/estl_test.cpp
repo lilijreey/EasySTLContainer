@@ -52,6 +52,7 @@ TEST(vector, read_only_methods)
     ASSERT_EQ(v.size(), v.count(lamdba_exp(_ele > 0)));
 
     v = {2,1,3,1,4,1};
+    ASSERT_EQ(v.cbegin(), v.begin());
     ASSERT_EQ(v.begin(), v.find(2));
     ASSERT_EQ(v.begin()+1, v.find(1));
     ASSERT_TRUE(v.is_include(3));
@@ -80,14 +81,13 @@ TEST(vector, read_only_methods)
    ASSERT_EQ(*it++,4);
    ASSERT_EQ(*it++,2);
 
-   for (auto & e : v.select_iter(lamdba_exp(_ele %2 ==0)))
-{
-      // printf("%d,", e);
-       ASSERT_TRUE(e %2 == 0);
-}
+    for (auto & e : v.select_iter(lamdba_exp(_ele %2 ==0)))
+    {
+        // printf("%d,", e);
+        ASSERT_TRUE(e %2 == 0);
+    }
 
-ASSERT_EQ(18, v.fold(0, [](const auto &acc, const auto &e){return acc + e;}));
-   // v.foldl(3, [](int acc, ele))
+    ASSERT_EQ(18, v.fold(0, [](const auto &acc, const auto &e){return acc + e;}));
 
     //删除所有<=3 的元素
     //xx.remove()

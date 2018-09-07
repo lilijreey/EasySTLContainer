@@ -10,7 +10,8 @@ template<
     class T,
     class Allocator = std::allocator<T>
 > class Vector : public std::vector<T, Allocator> {
-  using stl_container_type =  std::vector<T, Allocator>;
+  using base_type =  std::vector<T, Allocator>;
+  using const_base_type =  const std::vector<T, Allocator>;
 public:
   using std::vector<T, Allocator>::vector;
 
@@ -57,32 +58,54 @@ public:
   ///@brief find the first element in container
   ///@param e find the element
   ///@return element iterator or end() if not find.
-  typename stl_container_type::iterator find(const T &e) {
-      return std::find(this->begin(), this->end(), e);
-  }
 
-  typename stl_container_type::const_iterator find(const T &e) const {
-      return std::find(this->begin(), this->end(), e);
-  }
+    //find T, 返回为非const_iter 但是可以复制给const_iter 少些一个非const_iter版本
+    template<class E,
+            typename std::enable_if<std::is_same<
+                    typename std::remove_cv<typename std::remove_reference<T>::type>::type,
+                    typename std::remove_cv<typename std::remove_reference<E>::type>::type>::value
+                    ,int >::type=0>
+    typename base_type::iterator find(E &&e) const {
+        return std::find(const_cast<base_type*>(static_cast<const_base_type*>(this))->begin(),
+                         const_cast<base_type*>(static_cast<const_base_type*>(this))->end(),
+                         std::forward<E>(e));
+    }
 
-  //XXX use &&
-  template<class Unarypredicate>
-  typename stl_container_type::const_iterator find(const Unarypredicate &fn) const {
-      return std::find_if(this->begin(), this->end(), fn);
-  }
 
-  template<class Unarypredicate>
-  typename stl_container_type::iterator find(const Unarypredicate &fn) {
-      return std::find_if(this->begin(), this->end(), fn);
-  }
+    //fn
+    template<class Fn,
+            typename std::enable_if<!std::is_same<
+                    typename std::remove_cv<typename std::remove_reference<T>::type>::type,
+                    typename std::remove_cv<typename std::remove_reference<Fn>::type>::type>::value
+                    ,int >::type=0>
+    typename base_type::iterator find(Fn &&fn) const {
+        return std::find_if(const_cast<base_type*>(static_cast<const_base_type*>(this))->begin(),
+                            const_cast<base_type*>(static_cast<const_base_type*>(this))->end(),
+                            std::forward<Fn>(fn));
+    }
+
+
 
   bool is_include(const T &e) const {
       return find(e) != this->end();
   }
 
-  bool is_equal(const std::initializer_list<T> &o) const {
-      return is_equal(o);
-  }
+
+
+    template<class Iter>
+    bool is_equal(Iter &&begin, Iter &&end, std::random_access_iterator_tag _tag) const {
+        return this->size() == std::distance(begin, end)
+               &&
+               std::equal(this->begin(), this->end(),
+                          std::forward<Iter>(begin),
+                          std::forward<Iter>(end));
+    }
+
+
+    bool is_equal(const std::initializer_list<T> &o) const {
+        return this->size() == o.size() &&
+               std::equal(this->begin(), this->end(), std::begin(o), std::end(o));
+    }
 
   template<class Container>
   bool is_equal(const Container &o) const {
@@ -90,7 +113,9 @@ public:
           std::equal(this->begin(), this->end(), std::begin(o), std::end(o));
   }
 
+
   ///@brief Invokes the given fn once for each element of self.
+  ///@param Fn void(T&)
   template<class Fn>
   Vector &map_self(Fn &&fn) {
       for (auto &e : *this)
@@ -99,11 +124,24 @@ public:
       return *this;
   }
 
+    ///@brief map resualt to new Vector, not change self.
+    ///@param Fn T(const T&)
+    template<class Fn>
+    Vector map(Fn &&fn) const {
+        Vector ret;
+        ret.reserve(this->size());
+
+        for (auto &e : *this)
+            ret.emplace_back(std::forward<Fn>(fn)(e));
+
+        return ret;
+    }
+
   template<class Unarypredicate>
   size_t erase(Unarypredicate &&fn) {
       auto it = std::remove_if(this->begin(), this->end(), std::forward<Unarypredicate>(fn));
       const size_t eraseCount = std::distance(it, this->end());
-      stl_container_type::erase(it, this->end());
+      base_type::erase(it, this->end());
 
       return eraseCount;
   }
@@ -121,6 +159,7 @@ public:
 
   using SelectFn = std::function<bool(const T &)>;
 
+    //TODO 模板
   struct SelectIter {
     SelectIter(const SelectFn &fn, Vector *container)
         : _fn(fn), _it(container->find(fn)), _container(container) {}
@@ -137,7 +176,7 @@ public:
         return ret;
     }
 
-    bool operator==(const typename stl_container_type::iterator &o) const {
+    bool operator==(const typename base_type::iterator &o) const {
         return _it == o;
     }
 
@@ -164,7 +203,7 @@ public:
 
   private:
     const SelectFn &_fn;
-    typename stl_container_type::iterator _it;
+    typename base_type::iterator _it;
     Vector *_container;
   };
 
@@ -173,6 +212,13 @@ public:
       return SelectIter(fn, this);
   }
 
+    template<class Fn>
+    Vector &select_while(const T &o, Fn &&fn) {
+        for (auto &e: *this)
+            if (e == o) std::forward<Fn>(fn)(e);
+
+        return *this;
+    }
 
   ///@brief select element and pass to fn, as same as 'take_while' in other luangages
   ///@param selectFn return true if select element
