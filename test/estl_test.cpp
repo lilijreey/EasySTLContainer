@@ -67,12 +67,10 @@ TEST(vector, read_only_methods)
     v = xx;
 
 
-
-    v.select_while(lamdba_exp(_ele > 3),
+    v.select_take(lamdba_exp(_ele > 3),
                    lamdba_fn{ASSERT_TRUE(_ele >3);});
 
 
-    v.erase(lamdba_exp(_ele>3));
    v = xx;
    auto it = v.select_iter(
        lamdba_exp(_ele %2 == 0));
@@ -89,8 +87,32 @@ TEST(vector, read_only_methods)
 
     ASSERT_EQ(18, v.fold(0, [](const auto &acc, const auto &e){return acc + e;}));
 
-    //删除所有<=3 的元素
-    //xx.remove()
+}
+
+
+TEST(vector, erase_fns)
+{
+    {
+        Vector<int> v{1,2,3,4,5};
+        std::vector<int> o;
+        static_assert(std::is_same<Vector<int>::iterator, std::vector<int>::iterator>::value, "not same");
+        ASSERT_EQ(2, *(v.erase(v.begin())));
+    }
+    {
+        Vector<int> v{1,2,3,4,5};
+        ASSERT_EQ(v.end(),v.erase(lamdba_exp(_ele>3)));
+        ASSERT_EQ(3, v.size());
+        ASSERT_TRUE(v.is_equal({1,2,3}));
+
+    }
+    {
+        Vector<int> v{1,2,3,4,5};
+
+        ASSERT_EQ(3, v.erase_take(lamdba_exp(_ele > 2),
+                    [](int e) {  ASSERT_TRUE(e > 2); }));
+        ASSERT_EQ(2, v.size());
+        ASSERT_TRUE(v.is_equal({1,2}));
+    }
 
 
 }

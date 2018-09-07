@@ -12,7 +12,7 @@ enable_testing()
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-add_executable(estl_test src/estl.hpp test/estl_test.cpp)
+add_executable(estl_test src/estl.hpp test/estl_test.cpp src/estl_select_iter.hpp)
 target_link_libraries(estl_test gtest_main gtest pthread)
 
 

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <functional>
 #include <type_traits>
+#include "estl_select_iter.hpp"
 
 namespace estl {
 
@@ -12,6 +13,7 @@ template<
 > class Vector : public std::vector<T, Allocator> {
   using base_type =  std::vector<T, Allocator>;
   using const_base_type =  const std::vector<T, Allocator>;
+  using self_type = Vector<T, Allocator> ;
 public:
   using std::vector<T, Allocator>::vector;
 
@@ -137,14 +139,43 @@ public:
         return ret;
     }
 
-  template<class Unarypredicate>
-  size_t erase(Unarypredicate &&fn) {
-      auto it = std::remove_if(this->begin(), this->end(), std::forward<Unarypredicate>(fn));
-      const size_t eraseCount = std::distance(it, this->end());
-      base_type::erase(it, this->end());
+    //TODO using base_type::erase; not work correct, why?
+    typename base_type::iterator erase(const typename self_type::iterator &it)
+    {
+        return base_type::erase(it);
+    }
 
-      return eraseCount;
+    typename base_type::iterator erase(const typename self_type::const_iterator &it)
+    {
+        return base_type::erase(it);
+    }
+
+    typename base_type::iterator erase(const T &e)
+    {
+        return base_type::erase(std::remove(this->begin(), this->end(), e), this->end());
+    }
+
+  template<class Fn>
+   typename base_type::iterator erase(const Fn &fn) {
+      //return base_type::erase(std::remove_if(this->begin(), this->end(), std::forward<Fn>(fn)), this->end());
+      return base_type::erase(std::remove_if(this->begin(), this->end(), fn), this->end());
   }
+
+    //删除前传递给Fn, 返回返回后元素会被删除
+    //Fn:: (T&)->void
+    template<class Unarypredicate, class Fn>
+    size_t erase_take(Unarypredicate &&SelectFn, Fn &&fn) {
+        auto it = std::remove_if(this->begin(), this->end(), std::forward<Unarypredicate>(SelectFn));
+        size_t eraseCount = 0;
+        while (it != this->end())
+        {
+            fn(*it);
+            it = base_type::erase(it);
+            ++eraseCount;
+        }
+
+        return eraseCount;
+    }
 
   Vector &stable_sort() {
       std::stable_sort(this->begin(), this->end());
@@ -157,63 +188,15 @@ public:
       return *this;
   }
 
-  using SelectFn = std::function<bool(const T &)>;
 
-    //TODO 模板
-  struct SelectIter {
-    SelectIter(const SelectFn &fn, Vector *container)
-        : _fn(fn), _it(container->find(fn)), _container(container) {}
-
-    SelectIter begin() const {
-        auto ret = *this;
-        ret._it = _container->find(_fn);
-        return ret;
+    template <class SelectFn>
+    SelectIter<self_type, SelectFn> select_iter(SelectFn &&fn)
+    {
+        return SelectIter<self_type, SelectFn>(this, std::forward<SelectFn>(fn));
     }
-
-    SelectIter end() const {
-        SelectIter ret =*this;
-        ret._it = _container->end();
-        return ret;
-    }
-
-    bool operator==(const typename base_type::iterator &o) const {
-        return _it == o;
-    }
-
-    bool operator!=(const SelectIter &o) const {
-        return _container != o._container ||
-               _it != o._it;
-    }
-
-    SelectIter& operator++() {
-        _it = std::find_if(++_it, _container->end(), _fn);
-        return *this;
-    }
-
-    SelectIter operator++(int) {
-        SelectIter ret = *this;
-        _it = std::find_if(++_it, _container->end(), _fn);
-        return ret;
-    }
-
-
-    T &operator*() const {
-        return *_it;
-    }
-
-  private:
-    const SelectFn &_fn;
-    typename base_type::iterator _it;
-    Vector *_container;
-  };
-
-  SelectIter select_iter(const SelectFn &fn)
-  {
-      return SelectIter(fn, this);
-  }
 
     template<class Fn>
-    Vector &select_while(const T &o, Fn &&fn) {
+    Vector &select_take(const T &o, Fn &&fn) {
         for (auto &e: *this)
             if (e == o) std::forward<Fn>(fn)(e);
 
@@ -224,7 +207,7 @@ public:
   ///@param selectFn return true if select element
   ///@param fn
   template<class SelectFn, class Fn>
-  Vector &select_while(SelectFn &&selectFn, Fn &&fn) {
+  Vector &select_take(SelectFn &&selectFn, Fn &&fn) {
       for (auto &e: *this)
           if (std::forward<SelectFn>(selectFn)(e))
               std::forward<Fn>(fn)(e);

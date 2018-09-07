@@ -15,6 +15,7 @@ just copy xx.hpp file to your project, or system include path
 select_iter 泛化 使用与所有容器
 erase_iter
 remove_iter
+erase_safe_for
 
 
 
