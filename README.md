@@ -63,7 +63,6 @@ TODO
 
 课程目录
 0. 课程概览
-   * 自我介绍
    * 目标墙
 1. 进入现代C++
    * Why Modern C++?
@@ -303,6 +302,7 @@ type && = rvalue;
  * 移动赋值
 
 
+
 Syntax
 class_name ( class_name && )
 class_name ( const class_name && )
@@ -324,6 +324,9 @@ class_name ( const class_name && )
 
 * 没有定义使用copy构造
 
+* 何时需要定义移动构造
+  几乎不需要，触发给类型需要支持移动概念
+
 ## std::move
 强制使用移动语义
 不可复制对象
@@ -339,7 +342,36 @@ std::move
 osities: std::move that doesn't move : Yet Another Coder
 std::move 其实并不是移动的意思而是 cast to right reference
 
- RVO
+ move 更多的并不是用来避免返回值拷贝，而是完成移动
+ ---
+Copy Elision
+主要包含RVO,和参数拷贝优化
+ RVO (return value optimization)
+ NRVO
+
+ 常使用传入变量地址到调用函数
+ string ss() {
+      ..//
+      retun
+}
+
+哪些函数不会执行RVO ?
+RVO 并不是总会执行,即使到了C++17标准已经涵盖RVO特性
+返回一个非函数local 的变量
+
+A (A o)
+{
+    return o;
+}
+
+if (someCond)
+    return a;
+    else
+        return b;
+    }
+
+--- 
+f(std::string("A"))
 
 看一些代码
 
@@ -377,7 +409,11 @@ Buffer read(Buffer&& buffer) {
     return std::move( buffer ); //return buffer ref thing
     return buffer ; // return a buffer ref thing's copy
 }
+
 return std::move(xxx)??
+大部分情况下都不需要，如果显示写反而会阻止RVO
+也就是即使返回类型支持移动构造，也不要试使用std::move 强制触发
+
 
 
 * 返回类型为&& ??
